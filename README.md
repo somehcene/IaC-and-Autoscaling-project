@@ -45,6 +45,7 @@ IaC-and-Autoscaling-project/
 │   ├── prometheus-service.yaml
 │   ├── grafana-deployment.yaml
 │   └── grafana-service.yaml
+├── setup.sh
 ├── README.md
 ```
 
@@ -160,6 +161,32 @@ You should see consistent replication: `"Ahcene LOUBAR"`
 - Autoscaling targets are set to **50% CPU usage**.
 
 ---
+
+⚙️ Installation Automatisée
+
+Pour configurer et lancer entièrement le projet (Docker, Minikube, Kubernetes, Prometheus, Grafana...), il suffit d'exécuter le script d'automatisation suivant :
+```
+chmod +x setup.sh
+./setup.sh
+```
+
+Ce script effectue automatiquement les étapes suivantes :
+
+    Mise à jour des paquets
+
+    Installation de Docker, kubectl, Minikube
+
+    Build et push des images Docker (backend & frontend)
+
+    Déploiement de tous les fichiers YAML Kubernetes
+
+    Configuration du monitoring avec Prometheus & Grafana
+
+    Démarrage des services avec Minikube
+
+    🔒 Note : Si vous êtes sur une machine avec un compte root, Minikube doit être lancé avec l’option --force.
+
+    🔑 Assurez-vous aussi d’avoir ajouté votre clé SSH à GitHub pour éviter les erreurs d’authentification lors du git push.
 
 ## 📍 Author
 
