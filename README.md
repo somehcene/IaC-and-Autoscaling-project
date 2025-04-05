@@ -19,7 +19,6 @@ This project demonstrates a full-stack application with autoscaling and monitori
 ## 📁 Project Structure
 
 ```plaintext
-
 IaC-and-Autoscaling-project/
 ├── backend/                       # Node.js application with Dockerfile
 │   ├── Dockerfile
@@ -47,18 +46,18 @@ IaC-and-Autoscaling-project/
 │   ├── grafana-deployment.yaml
 │   └── grafana-service.yaml
 ├── README.md
-
 ```
 
 ---
 
-##  How to Run
+## 🚀 How to Run
 
-### Install Docker & Kubernetes (Minikube)
+### 🐳 Install Docker & Kubernetes (Minikube)
 Follow the official installation guides for [Docker](https://docs.docker.com/get-docker/) and [Minikube](https://minikube.sigs.k8s.io/docs/start/).
 
-### Build Docker Images
+### 🏗️ Build Docker Images
 
+```bash
 cd backend
 docker build -t backend-image .
 docker tag backend-image somehcene/backend-image
@@ -68,14 +67,18 @@ cd ../frontend
 docker build -t frontend-image .
 docker tag frontend-image somehcene/frontend-image
 docker push somehcene/frontend-image
+```
 
-### Deploy on Minikube
+### ☸️ Deploy on Minikube
 
+```bash
 minikube start --force
 kubectl apply -f fichiers-yaml/
+```
 
-You can also apply resources individually for better debugging:
+Or apply resources individually:
 
+```bash
 kubectl apply -f redis-maitre-deployment.yaml
 kubectl apply -f redis-esclave-deployment.yaml
 kubectl apply -f backend-deployment.yaml
@@ -83,61 +86,82 @@ kubectl apply -f frontend-deployment.yaml
 kubectl apply -f prometheus-cfg.yaml
 kubectl apply -f prometheus-deployment.yaml
 kubectl apply -f grafana-deployment.yaml
+```
 
-### Horizontal Pod Autoscaling
+### 📈 Horizontal Pod Autoscaling
 
+```bash
 kubectl get hpa
+```
 
-You should see backend-auto-scaling and redis-esclave-auto-scaling running and scaling pods based on CPU load.
-🔍 Access Services
+You should see `backend-auto-scaling` and `redis-esclave-auto-scaling` running and scaling pods based on CPU load.
 
+---
+
+### 🔍 Access Services
+
+```bash
 minikube service backend --url     # Node.js API
 minikube service frontend --url    # React app
 minikube service prometheus --url  # Prometheus dashboard
 minikube service grafana --url     # Grafana dashboard
+```
 
-Default Grafana login:
+**Default Grafana login:**
 
-    User: admin
+```text
+User: admin
+Pass: admin (or your setup)
+```
 
-    Pass: admin (or your setup)
+---
 
-🧪 Test Redis Replication
+### 🧪 Test Redis Replication
 
 Set value from master:
 
+```bash
 kubectl exec -it deploy/redis-maitre -- redis-cli
 > set test "Ahcene LOUBAR"
+```
 
-Read from any slave:
+Read from slave:
 
+```bash
 kubectl exec -it deploy/redis-esclave -- sh
-# while true; do redis-cli get test; done
+# then run:
+while true; do redis-cli get test; done
+```
 
-You should see consistent replication: "Ahcene LOUBAR"
-💡 Troubleshooting Tips
-
-    Make sure to use SSH authentication for GitHub.
-
-    Don't run Minikube as root with Docker driver (unless --force is specified).
-
-    Avoid using cd documents (case-sensitive: Documents).
-
-    To re-deploy a service: kubectl delete -f file.yaml && kubectl apply -f file.yaml
-
-    For network issues, always validate with minikube service <name> --url
-
-📦 Deployment Notes
-
-    Both backend & frontend use multistage Docker builds for optimized image size.
-
-    Prometheus is configured with custom prometheus-cfg.yaml.
-
-    Autoscaling targets are set to 50% CPU usage.
-
-📍 Author
-
-👤 Ahcene Loubar
-📧 hceneloubar@gmail.com
+You should see consistent replication: `"Ahcene LOUBAR"`
 
 ---
+
+### 💡 Troubleshooting Tips
+
+- Make sure to use SSH authentication for GitHub.
+- Don’t run Minikube as root with Docker driver (unless `--force` is specified).
+- Avoid using `cd documents` (case-sensitive: `Documents`).
+- To re-deploy a service:
+  ```bash
+  kubectl delete -f file.yaml && kubectl apply -f file.yaml
+  ```
+- For network issues, always validate with:
+  ```bash
+  minikube service <name> --url
+  ```
+
+---
+
+### 📦 Deployment Notes
+
+- Backend & frontend use multi-stage Docker builds for optimized image size.
+- Prometheus is configured with custom `prometheus-cfg.yaml`.
+- Autoscaling targets are set to **50% CPU usage**.
+
+---
+
+## 📍 Author
+
+**👤 Ahcene Loubar**  
+📧 hceneloubar@gmail.com
