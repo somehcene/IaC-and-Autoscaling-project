@@ -162,31 +162,31 @@ You should see consistent replication: `"Ahcene LOUBAR"`
 
 ---
 
-⚙️ Installation Automatisée
+⚙️ Automated Installation
 
-Pour configurer et lancer entièrement le projet (Docker, Minikube, Kubernetes, Prometheus, Grafana...), il suffit d'exécuter le script d'automatisation suivant :
+To fully configure and launch the project (Docker, Minikube, Kubernetes, Prometheus, Grafana...), simply run the automation script:
+
 ```
 chmod +x setup.sh
 ./setup.sh
 ```
 
-Ce script effectue automatiquement les étapes suivantes :
+This script automatically performs the following steps:
 
-    Mise à jour des paquets
+    Updates system packages
 
-    Installation de Docker, kubectl, Minikube
+    Installs Docker, kubectl, and Minikube
 
-    Build et push des images Docker (backend & frontend)
+    Builds and pushes Docker images (backend & frontend)
 
-    Déploiement de tous les fichiers YAML Kubernetes
+    Deploys all Kubernetes YAML manifests
 
-    Configuration du monitoring avec Prometheus & Grafana
+    Sets up monitoring with Prometheus & Grafana
 
-    Démarrage des services avec Minikube
+    Starts services via Minikube
 
-    🔒 Note : Si vous êtes sur une machine avec un compte root, Minikube doit être lancé avec l’option --force.
-
-    🔑 Assurez-vous aussi d’avoir ajouté votre clé SSH à GitHub pour éviter les erreurs d’authentification lors du git push.
+    🔒 Note: If you're running as root, Minikube must be started with the --force option.
+    🔑 Make sure your SSH key is added to GitHub to avoid authentication errors during git push.
 
 ## 📍 Author
 
