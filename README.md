@@ -17,8 +17,26 @@ This project demonstrates a full DevOps pipeline using Docker and Kubernetes for
 ---
 
 ## 📁 Project Structure
-
-CRV-projet/ ├── backend/ # Node.js application with Dockerfile ├── frontend/ # React application with Dockerfile ├── fichiers-yaml/ # Kubernetes manifests │ ├── backend-deployment.yaml │ ├── frontend-deployment.yaml │ ├── redis-maitre-deployment.yaml │ ├── redis-esclave-deployment.yaml │ ├── prometheus-cfg.yaml │ ├── grafana-deployment.yaml │ └── ... ├── README.md
+IaC-and-Autoscaling-project/
+├── backend/                  # Node.js application with Dockerfile
+├── frontend/                 # React application with Dockerfile
+├── fichiers-yaml/           # Kubernetes manifests
+│   ├── backend-deployment.yaml
+│   ├── backend-service.yaml
+│   ├── backend-auto-scaling.yaml
+│   ├── frontend-deployment.yaml
+│   ├── frontend-service.yaml
+│   ├── redis-maitre-deployment.yaml
+│   ├── redis-maitre-service.yaml
+│   ├── redis-esclave-deployment.yaml
+│   ├── redis-esclave-service.yaml
+│   ├── redis-esclave-auto-scaling.yaml
+│   ├── prometheus-cfg.yaml
+│   ├── prometheus-deployment.yaml
+│   ├── prometheus-service.yaml
+│   ├── grafana-deployment.yaml
+│   ├── grafana-service.yaml
+├── README.md
 
 
 ---
