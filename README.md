@@ -52,43 +52,92 @@ IaC-and-Autoscaling-project/
 
 ---
 
-## ▶️ How to Run
+##  How to Run
 
-### 1. Install Docker & Kubernetes (Minikube)
+### Install Docker & Kubernetes (Minikube)
 Follow the official installation guides for [Docker](https://docs.docker.com/get-docker/) and [Minikube](https://minikube.sigs.k8s.io/docs/start/).
 
-### 2. Start Minikube
+### Build Docker Images
 
-```bash
+cd backend
+docker build -t backend-image .
+docker tag backend-image somehcene/backend-image
+docker push somehcene/backend-image
+
+cd ../frontend
+docker build -t frontend-image .
+docker tag frontend-image somehcene/frontend-image
+docker push somehcene/frontend-image
+
+### Deploy on Minikube
+
 minikube start --force
-```
-
-### 3. Apply Kubernetes Manifests
-
-```bash
 kubectl apply -f fichiers-yaml/
-```
 
-### 4. Access Services
+You can also apply resources individually for better debugging:
 
-```bash
-minikube service backend --url
-minikube service frontend --url
-minikube service prometheus --url
-minikube service grafana --url
-```
+kubectl apply -f redis-maitre-deployment.yaml
+kubectl apply -f redis-esclave-deployment.yaml
+kubectl apply -f backend-deployment.yaml
+kubectl apply -f frontend-deployment.yaml
+kubectl apply -f prometheus-cfg.yaml
+kubectl apply -f prometheus-deployment.yaml
+kubectl apply -f grafana-deployment.yaml
 
----
+### Horizontal Pod Autoscaling
 
-## 📊 Monitoring
+kubectl get hpa
 
-- Visit **Grafana** and configure Prometheus as a data source.
-- Dashboards can be imported for Redis/Node.js metrics visualization.
+You should see backend-auto-scaling and redis-esclave-auto-scaling running and scaling pods based on CPU load.
+🔍 Access Services
 
----
+minikube service backend --url     # Node.js API
+minikube service frontend --url    # React app
+minikube service prometheus --url  # Prometheus dashboard
+minikube service grafana --url     # Grafana dashboard
 
-## 🧠 Author
+Default Grafana login:
 
-> Ahcene Loubar – `@somehcene`
+    User: admin
+
+    Pass: admin (or your setup)
+
+🧪 Test Redis Replication
+
+Set value from master:
+
+kubectl exec -it deploy/redis-maitre -- redis-cli
+> set test "Ahcene LOUBAR"
+
+Read from any slave:
+
+kubectl exec -it deploy/redis-esclave -- sh
+# while true; do redis-cli get test; done
+
+You should see consistent replication: "Ahcene LOUBAR"
+💡 Troubleshooting Tips
+
+    Make sure to use SSH authentication for GitHub.
+
+    Don't run Minikube as root with Docker driver (unless --force is specified).
+
+    Avoid using cd documents (case-sensitive: Documents).
+
+    To re-deploy a service: kubectl delete -f file.yaml && kubectl apply -f file.yaml
+
+    For network issues, always validate with minikube service <name> --url
+
+📦 Deployment Notes
+
+    Both backend & frontend use multistage Docker builds for optimized image size.
+
+    Prometheus is configured with custom prometheus-cfg.yaml.
+
+    Autoscaling targets are set to 50% CPU usage.
+
+📍 Author
+
+👤 Ahcene Loubar
+📧 hceneloubar@gmail.com
 
 ---
