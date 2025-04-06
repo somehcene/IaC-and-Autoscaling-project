@@ -142,7 +142,6 @@ You should see consistent replication: `"Ahcene LOUBAR"`
 
 - Make sure to use SSH authentication for GitHub.
 - Don’t run Minikube as root with Docker driver (unless `--force` is specified).
-- Avoid using `cd documents` (case-sensitive: `Documents`).
 - To re-deploy a service:
   ```bash
   kubectl delete -f file.yaml && kubectl apply -f file.yaml
