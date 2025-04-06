@@ -1,50 +1,91 @@
 #!/bin/bash
 
-set -e
+# === 1. Mise à jour et dépendances ===
+sudo apt-get update -y
+sudo apt-get install -y ca-certificates curl gnupg lsb-release
 
-### CONFIG ###
-DOCKER_USER="somehcene"
-PROJECT_DIR="$PWD"
-YAML_DIR="$PROJECT_DIR/fichiers-yaml"
-BACKEND_DIR="$PROJECT_DIR/backend"
-FRONTEND_DIR="$PROJECT_DIR/frontend"
-################
+# === 2. Suppression d’anciens Docker éventuels ===
+for pkg in docker.io docker-doc docker-compose-v2 podman-docker containerd runc; do
+  sudo apt-get remove -y $pkg
+done
 
-echo "🚀 Starting IaC & Autoscaling project setup..."
+# === 3. Installation de Docker ===
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo tee /etc/apt/keyrings/docker.asc > /dev/null
+sudo chmod a+r /etc/apt/keyrings/docker.asc
 
-### STEP 1: Docker Login ###
-echo "🔐 Logging in to Docker..."
-docker login
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" |
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-### STEP 2: Build & Push Backend ###
-echo "📦 Building backend image..."
-cd "$BACKEND_DIR"
+sudo apt-get update -y
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# === 4. Test Docker ===
+sudo docker run hello-world
+
+# === 5. Installation de kubectl ===
+curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+
+# === 6. Installation de minikube ===
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+mv minikube-linux-amd64 minikube
+chmod +x minikube
+sudo install minikube /usr/local/bin/
+
+# === 7. Lancement de Minikube ===
+sudo minikube start --force
+
+# === 8. Déploiement Kubernetes ===
+cd ~/Documents/CRV-projet/fichiers-yaml
+
+kubectl apply -f redis-maitre-deployment.yaml
+kubectl apply -f redis-maitre-service.yaml
+kubectl apply -f redis-esclave-deployment.yaml
+kubectl apply -f redis-esclave-service.yaml
+kubectl apply -f redis-esclave-auto-scaling.yaml
+
+# Metrics server pour le HPA
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+kubectl patch deployment metrics-server -n kube-system \
+  --type='json' \
+  -p='[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]'
+
+# === 9. Docker Build & Push backend ===
+cd ../backend
 docker build -t backend-image .
-docker tag backend-image "$DOCKER_USER/backend-image"
-docker push "$DOCKER_USER/backend-image"
+docker tag backend-image hcene/backend-image
+docker push hcene/backend-image
 
-### STEP 3: Build & Push Frontend ###
-echo "🌐 Building frontend image..."
-cd "$FRONTEND_DIR"
+# === 10. Déploiement backend ===
+cd ../fichiers-yaml
+kubectl apply -f backend-deployment.yaml
+kubectl apply -f backend-service.yaml
+kubectl apply -f backend-auto-scaling.yaml
+
+# === 11. Docker Build & Push frontend ===
+cd ../frontend
 docker build -t frontend-image .
-docker tag frontend-image "$DOCKER_USER/frontend-image"
-docker push "$DOCKER_USER/frontend-image"
+docker tag frontend-image hcene/frontend-image
+docker push hcene/frontend-image
 
-### STEP 4: Start Minikube ###
-echo "⚙️ Starting Minikube cluster..."
-minikube start --driver=docker --force
+# === 12. Déploiement frontend ===
+cd ../fichiers-yaml
+kubectl apply -f frontend-deployment.yaml
+kubectl apply -f frontend-service.yaml
 
-### STEP 5: Apply YAMLs ###
-echo "📜 Applying Kubernetes manifests..."
-cd "$YAML_DIR"
-kubectl apply -f .
+# === 13. Déploiement monitoring ===
+kubectl apply -f prometheus-cfg.yaml
+kubectl apply -f prometheus-deployment.yaml
+kubectl apply -f prometheus-service.yaml
+kubectl apply -f grafana-deployment.yaml
+kubectl apply -f grafana-service.yaml
 
-### STEP 6: Show Service URLs ###
-echo ""
-echo "🔗 Access your services:"
-echo "Backend:     $(minikube service backend --url)"
-echo "Frontend:    $(minikube service frontend --url)"
-echo "Prometheus:  $(minikube service prometheus --url)"
-echo "Grafana:     $(minikube service grafana --url)"
-echo ""
-echo "✅ All set up! Enjoy your cluster 🎉"
+# === 14. Affichage des URLs ===
+echo "🔗 Accès backend : $(minikube service backend --url)"
+echo "🔗 Accès frontend : $(minikube service frontend --url)"
+echo "🔗 Accès Prometheus : $(minikube service prometheus --url)"
+echo "🔗 Accès Grafana : $(minikube service grafana --url)"
